@@ -7,6 +7,13 @@ Copy paste the whole sheet into a text file, and feed the text file into the fil
 
 The code is done in two parts.  First part is an executable to generate all the histograms.  The second part is to take the histograms and make efficiencies, turn-ons, and scalings.
 
+Note:
+1. Code for second part is not in the repository yet - I need to clean them up and commit here
+1. Instructions on the config file sheet is coming
+1. Instructions for new tree version is coming
+1. Code needs some polishing up...
+
+
 
 
 
