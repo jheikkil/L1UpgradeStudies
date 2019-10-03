@@ -34,7 +34,7 @@ library/FillHistograms: makes all the histograms needed for later steps.  Input 
 Each object is in its own directory.  Within each directory, there are many many histograms.  Let's take TkElectron as example.  The naming convention is
 1. TkElectronNoMatch_*_000000: The distribution without gen-match
 1. TkElectron_*_000000: the distribution with gen-match, but no L1 PT requirement
-1. TkElectron_*_00XX00: the distribution with gen-match, and with L1 PT > XX.  30 GeV = 003000, 10.5 GeV = 001050, etc.
+1. TkElectron_*_00XX00: the distribution with gen-match, and with L1 PT > XX.  30 GeV = 003000, 10.5 GeV = 001050, etc.  The list is set by the "preset" column in the config file.
 
 There are a number of distributions in the middle field
 1. PT: PT distribution without any eta restriction
@@ -67,12 +67,12 @@ There are a number of distributions in the middle field
 1. DXY: DXY distribution
 1. DXYPT`x`: DXY, PT > `x`, `x` = 15, 20, 30
 
+So... If you want...
 
-
-
-
-
-
+1. Matching efficiency vs PT: TkElectron_PT_000000 / TkElectronNoMatch_PT_000000
+1. Matching efficiency vs eta: TkElectron_Eta_000000 / TkElectronNoMatch_Eta_000000
+1. Turn on with threhsold 15: TkElectron_PT_001500 / TkElectron_PT_000000
+1. Isolation distritbuion: TkElectron_TkIso_000000
 
 
 
