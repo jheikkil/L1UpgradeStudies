@@ -1,10 +1,12 @@
+# L1UpgradeStudies code
+
 This is the code to make turn on and efficiencies
 
 Config file here
 https://docs.google.com/spreadsheets/d/14CVVhA6ITSTmv0x0Z2BRJ7cLgMKabi6TWsDXbyffGBg/edit#gid=1735114236
 
 
-# Setup (on lxplus)
+## Setup (on lxplus)
 
 1. Setup a recent CMSSW environment
 1. Make sure you have root and fastjet in PATH
@@ -13,7 +15,7 @@ https://docs.google.com/spreadsheets/d/14CVVhA6ITSTmv0x0Z2BRJ7cLgMKabi6TWsDXbyff
 
 
 
-# More information on the binaries
+## More information on the binaries
 
 library/FillHistograms: makes all the histograms needed for later steps.  Input parameters as follows
 1. input: comma-separated list of all root files
