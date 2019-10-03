@@ -74,8 +74,9 @@ So... If you want...
 1. Turn on with threhsold 15: TkElectron_PT_001500 / TkElectron_PT_000000
 1. Isolation distritbuion: TkElectron_TkIso_000000
 
+For things involving isolation, sometimes you need to get it from different folders.  For example
 
-
+1. Matching efficiency vs PT for TkIsoElectron: TkIsoElectron_PT_000000 / TkElectronIsoNoMatch_PT_000000
 
 
 
