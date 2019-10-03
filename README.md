@@ -4,6 +4,7 @@ This is the code to make turn on and efficiencies
 
 Config file here
 https://docs.google.com/spreadsheets/d/14CVVhA6ITSTmv0x0Z2BRJ7cLgMKabi6TWsDXbyffGBg/edit#gid=1735114236
+Copy paste the whole sheet into a text file, and feed the text file into the fill histogram executable to run things
 
 The code is done in two parts.  First part is an executable to generate all the histograms.  The second part is to take the histograms and make efficiencies, turn-ons, and scalings.
 
