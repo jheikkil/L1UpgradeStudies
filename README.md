@@ -7,7 +7,7 @@ Copy paste the whole sheet into a text file, and feed the text file into the fil
 
 The code is done in two parts.  First part is an executable to generate all the histograms.  The second part is to take the histograms and make efficiencies, turn-ons, and scalings.
 
-The first step can take a while (1-2 hours), and that's because of the file I/O to write out all the histograms.  If you are pressed for time, consider making a smaller config file with only the few relevant lines.  Then after the rush, or on the side, we can launch the full thing (it's always a good idea to have all objects ready for all the files).
+The first step can take a while (few hours), and that's because of the file I/O to write out all the histograms.  If you are pressed for time, consider making a smaller config file with only the few relevant lines.  Then after the rush, or on the side, we can launch the full thing (it's always a good idea to have all objects ready for all the files).
 
 
 Note:
