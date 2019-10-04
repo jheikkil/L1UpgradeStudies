@@ -72,13 +72,40 @@ This executable fits stuff and gets the scalings, and writes results into a data
 1. `Do*`: a lot of booleans, all defaults to false.  The * can be {STAMuon, STADisplacedMuon, TkMuon, TkMuonStub, TkMuonStubS12, EG, EGExtended, EGTrack, Electron, ZElectron, IsoElectorn, Photon, PhotonPV, ElectronPV, PuppiJet, PuppiJetForMET, PuppiJetMin25, PuppiHT, PuppiMET, PFTau, PFIsoTau, CaloJet, CaloHT, TrackerJet, TrackerHT, TrackerMHT, TrackerMET, TkTau, CaloTkTau, TkEGTau, NNTauLoose, NNTauTight, CaloTau}.  Though it's best to look in the source code to see what is there
 
 The main work horse of this is the ProcessFile(...) function, which fits and produces one scaling line.  In case we need to fit new things, we have to add these functions in the code, with one of the `Do*` switch if possible, to make sure things don't litter around too much.  The function is defined as
+
 `void ProcessFile(PdfFileHelper &PdfFile, string FileName, string OutputFileName,
    string Prefix, vector<double> Thresholds,
    double Target, string Tag, string Name = "PT", int Type = TYPE_SMOOTH_SUPERTIGHT,
    int Scaling = LINEAR)`
 
+Here are the meaning of each of the thing
+
+1. `PdfFileHelper &PdfFile`: this is one of the Yi helper class that makes multiple-page pdfs a breeze.  It makes the final pdf output file
+1. `string FileName`: the file that contains all the histograms
+1. `string OutputFileName`: the data helper file filename.
+1. `string Prefix`: the directory to use in the histogram file
+1. `vector<double> Thresholds`: what thresholds to use in the scan
+1. `double Target`: the famous 98%, or some other number you like.  We pass it from command line
+1. `string Tag`: The tag to use to store the result in the data helper file
+1. `string Name`: The middle part of histogram to use (for example the `PT` in `TkElectron_PT_000000`)
+1. `int Type`: what kind of fit to perform.  Several possibilies are coded
+   1. `TYPE_FITFIX`: fits with the classic function `f(x)` we've been using for ages with three parameters: lambda, mu, sigma
+   1. `TYPE_FITFIX2`: let the baseline float by modifying the function as `f(x) * ([3]-[4]) + [4]`, but fix `[3]` to 1.0
+   1. `TYPE_FIT`: same modification as before, but fix `[4]` to 0 and let `[3]` float
+   1. `TYPE_FITFLOAT`: let the baseline and the plateau float by modifying the function as `f(x) * ([3]-[4]) + [4]`
+   1. `TYPE_FITTANH`: fits the turn on with a tanh() function
+   1. `TYPE_SMOOTH_LOOSE`: a string model that attempts to go through all the points with a loose tension.
+   1. `TYPE_SMOOTH_TIGHT`: same as above, a bit higher tension
+   1. `TYPE_SMOOTH_SUPERTIGHT`: similarly, with even higher tension
+   1. `TYPE_SMOOTH_ULTRATIGHT`: very tight strings!
+1. `int Scaling`: what kind of scaling to fit in the end.  99.9% we put `LINEAR`.  There is also `QUADRATIC`, which fits a quadratic curve of `x = a2 y^2 + a1 y + a0`  (note the swap between x and y)
 
 
+
+Note: The classic function is this one
+
+`f(x) = (ROOT::Math::normal_cdf([0]*(x-[1]), [0]*[2], 0) - exp(-[0]*(x-[1])+[0]*[0]*[2]*[2]/2)*ROOT::Math::normal
+_cdf([0]*(x-[1]), [0]*[2], [0]*[0]*[2]*[2]))`
 
 
 
