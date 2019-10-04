@@ -41,6 +41,7 @@ makes all the histograms needed for later steps.  Input parameters as follows
 1. `config`: the config file to use
 
 ### binary/PlotComparison
+
 this makes a plot with efficiencies or turn ons, or just simple distributions, or even cumulative distributions.  This executable is very versatile.  Input parameters as follows
 1. `label`: comma-separated list of histogram labels (to be used in legends)
 1. `file`: comma-separated list of files that contains the histograms
@@ -59,6 +60,25 @@ this makes a plot with efficiencies or turn ons, or just simple distributions, o
 1. `logy`: true/false.  Whether to do log y.  Defaults to false.
 1. `legendx`, `legendy`: Location of the upper-left corner of legend.  Defaults to (0.35, 0.20)
 1. `rebin`: integer, defaults to 1.  If not 1, the histograms will be rebinned using this number.
+
+### binary/MakeScalingPlot
+
+This executable fits stuff and gets the scalings, and writes results into a data helper file, in addition to producing a pdf for inspection.  Input parameters are -
+1. `input`: the root file from the first step containing all the histograms
+1. `output`: the output pdf file name.  Has to be pdf!
+1. `curves`: the output data helper file name.
+1. `reference`: where to take as the reference point.  We typically use 95%
+1. `prefix`: additional prefix to distinguish stuff in the data helper file
+1. `Do*`: a lot of booleans, all defaults to false.  The * can be {STAMuon, STADisplacedMuon, TkMuon, TkMuonStub, TkMuonStubS12, EG, EGExtended, EGTrack, Electron, ZElectron, IsoElectorn, Photon, PhotonPV, ElectronPV, PuppiJet, PuppiJetForMET, PuppiJetMin25, PuppiHT, PuppiMET, PFTau, PFIsoTau, CaloJet, CaloHT, TrackerJet, TrackerHT, TrackerMHT, TrackerMET, TkTau, CaloTkTau, TkEGTau, NNTauLoose, NNTauTight, CaloTau}.  Though it's best to look in the source code to see what is there
+
+The main work horse of this is the ProcessFile(...) function, which fits and produces one scaling line.  In case we need to fit new things, we have to add these functions in the code, with one of the `Do*` switch if possible, to make sure things don't litter around too much.  The function is defined as
+`void ProcessFile(PdfFileHelper &PdfFile, string FileName, string OutputFileName,
+   string Prefix, vector<double> Thresholds,
+   double Target, string Tag, string Name = "PT", int Type = TYPE_SMOOTH_SUPERTIGHT,
+   int Scaling = LINEAR)`
+
+
+
 
 
 
