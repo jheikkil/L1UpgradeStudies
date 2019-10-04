@@ -1,7 +1,8 @@
 # L1UpgradeStudies code
 
-Table of contents
+## Table of contents
 
+1. [Introduction](#introduction)
 1. [Setup (on lxplus)](#setup-on-lxplus)
 1. [More information on the binaries](#more-information-on-the-binaries)
    1. [binary/FillHistograms](#binaryfillhistograms)
@@ -11,6 +12,8 @@ Table of contents
 1. [Histogram structure](#histogram-structure)
 
 
+
+## Introduction
 
 This is the code to make turn on and efficiencies
 
