@@ -108,7 +108,8 @@ Note 1: The classic function is this one
 
 ```
 f(x) = (ROOT::Math::normal_cdf([0]*(x-[1]), [0]*[2], 0) - exp(-[0]*(x-[1])+[0]*[0]*[2]*[2]/2)*ROOT::Math::normal
-_cdf([0]*(x-[1]), [0]*[2], [0]*[0]*[2]*[2]))```
+_cdf([0]*(x-[1]), [0]*[2], [0]*[0]*[2]*[2]))
+```
 
 Note 2: Since we only care about the point where the turn on passes x% (usually 95%), the string model is a fine thing to use.  Sometimes the fit just won't converge for some strange reason.  And the string model is much more stable and flexible - for example if the detail of the turn on curve is not described well by the classic curve nor the tanh() around 10-30% turn on range, rather than finding the best curve to fit, we can use the string to go through the points and extract the 95% with good confidence.  
 
