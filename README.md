@@ -32,13 +32,16 @@ Note:
 
 ## More information on the binaries
 
-binary/FillHistograms: makes all the histograms needed for later steps.  Input parameters as follows
+### binary/FillHistograms
+
+makes all the histograms needed for later steps.  Input parameters as follows
 1. `input`: comma-separated list of all root files
 1. `output`: output file name (.root)
 1. `StoredGen`: true/false.  Whether to use the gen jet info stored in the tree, or recluster on the fly
 1. `config`: the config file to use
 
-binary/PlotComparison: this makes a plot with efficiencies or turn ons, or just simple distributions, or even cumulative distributions.  This executable is very versatile.  Input parameters as follows
+### binary/PlotComparison
+this makes a plot with efficiencies or turn ons, or just simple distributions, or even cumulative distributions.  This executable is very versatile.  Input parameters as follows
 1. `label`: comma-separated list of histogram labels (to be used in legends)
 1. `file`: comma-separated list of files that contains the histograms
 1. `numerators`: comma-separated list of histograms to be use as numerators

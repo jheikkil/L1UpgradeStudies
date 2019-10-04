@@ -9,7 +9,7 @@ commoncode: $(CommonCode)
 
 libraries: $(Libraries)
 
-executables: binary/FillHistograms binary/PlotComparison
+executables: binary/FillHistograms binary/PlotComparison binary/MakeScalingPlot
 
 library/L1Classes.so: include/L1Classes.h include/L1LinkDef.h
 	mkdir -p library
@@ -49,20 +49,31 @@ binary/PlotComparison: source/PlotComparison.cpp
 	g++ source/PlotComparison.cpp -Iinclude -o binary/PlotComparison \
 		`root-config --cflags --libs`
 
+binary/MakeScalingPlot: source/MakeScalingPlot.cpp
+	mkdir -p binary
+	g++ source/MakeScalingPlot.cpp -Iinclude -o binary/MakeScalingPlot \
+		`root-config --cflags --libs`
+
+TestRun: TestRunPart1 TestRunPart2
+
 DYLL_V9p3 = /eos/cms/store/group/cmst3/group/l1tr/cepeda/triggerntuples160/RelValZEE_14/crab_ZEE_noageing_106_V9_3//190910_103305/0000//
-TestRun: binary/FillHistograms binary/PlotComparison
+TestRunPart1: binary/FillHistograms
 	mkdir -p output
-	mkdir -p pdf
 	binary/FillHistograms --input `ls $(DYLL_V9p3)/* | head -n 10 | tr '\n' ',' | sed "s/,$$//g"` \
 		--output output/DYLL_V9p3.root --StoredGen true --config config/20190823DY.config
+	
+TestRunPart2: binary/PlotComparison binary/MakeScalingPlot
+	mkdir -p pdf
 	binary/PlotComparison \
 		--label "EGElectron (V9.3)","TkElectron (V9.3)","TkIsoElectron (V9.3)" \
 		--file output/DYLL_V9p3.root,output/DYLL_V9p3.root,output/DYLL_V9p3.root \
 		--numerator "EGTrackIDIso_PTEta15_000000","TkElectronTrackIDIso_PTEta15_000000","TkIsoElectron_PTEta15_000000" \
 		--denominator "auto","auto","TkElectronIsoNoMatch_PTEta15_000000" \
-		--title ";p_{T};Efficiency" --xmin 0 --xmax 40 --output pdf/EGComparison.pdf \
+		--title ";p_{T};Efficiency" --xmin 0 --xmax 40 --output pdf/V9p3_EGComparison.pdf \
 		--legendx 0.45 --legendy 0.20
-
-
+	mkdir -p dh
+	./binary/MakeScalingPlot --input output/DYLL_V9p3.root --output pdf/V9p3_EGScaling.pdf \
+		--curves dh/V9p3_Scaling.dh \
+		--reference 0.95 --DoEG true
 
 
