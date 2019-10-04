@@ -32,11 +32,31 @@ Note:
 
 ## More information on the binaries
 
-library/FillHistograms: makes all the histograms needed for later steps.  Input parameters as follows
-1. input: comma-separated list of all root files
-1. output: output file name (.root)
-1. StoredGen: true/false.  Whether to use the gen jet info stored in the tree, or recluster on the fly
-1. config: the config file to use
+binary/FillHistograms: makes all the histograms needed for later steps.  Input parameters as follows
+1. `input`: comma-separated list of all root files
+1. `output`: output file name (.root)
+1. `StoredGen`: true/false.  Whether to use the gen jet info stored in the tree, or recluster on the fly
+1. `config`: the config file to use
+
+binary/PlotComparison: this makes a plot with efficiencies or turn ons, or just simple distributions, or even cumulative distributions.  This executable is very versatile.  Input parameters as follows
+1. `label`: comma-separated list of histogram labels (to be used in legends)
+1. `file`: comma-separated list of files that contains the histograms
+1. `numerators`: comma-separated list of histograms to be use as numerators
+1. `denominators`: comma-separated list of histograms to be used as denominators.  Several possibilities here
+   1. histogram name.  Takes the histogram from the file
+   1. "auto".  Guesses the denominator name by adding "NoMatch"
+   1. "simple".  Don't divide the numerator histogram by anything.  Just plot the distribution
+   1. "cumulative".  Don't divide the numerator histogram, but instead draw the cumulative version of it (useful for isolation derivation)
+1. `output`: output filename.
+1. `title`: string to be passed into the histogram constructor.  For example: "title;x;y"
+1. `xmin`, `xmax`, `ymin`, `ymax`: range of axes.  y range defaults to (0.0, 1.1) if omitted
+1. `color`: comma-separated list of integers to be used as colors (see root TColor for the list) for each curve
+1. `line`: comma-separated list of doubles.  Each one will draw a horizontal dashed line on the plot
+1. `grid`: true/false.  Whether to enable grid.  Defaults to false.
+1. `logy`: true/false.  Whether to do log y.  Defaults to false.
+1. `legendx`, `legendy`: Location of the upper-left corner of legend.  Defaults to (0.35, 0.20)
+1. `rebin`: integer, defaults to 1.  If not 1, the histograms will be rebinned using this number.
+
 
 
 ## Histogram structure
