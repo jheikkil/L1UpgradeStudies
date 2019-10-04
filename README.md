@@ -63,30 +63,32 @@ this makes a plot with efficiencies or turn ons, or just simple distributions, o
 
 ### binary/MakeScalingPlot
 
-This executable fits stuff and gets the scalings, and writes results into a data helper file, in addition to producing a pdf for inspection.  Input parameters are -
+This executable fits stuff and gets the scalings, and writes results into a data helper (DH) file, in addition to producing a pdf for inspection.  Input parameters are -
 1. `input`: the root file from the first step containing all the histograms
 1. `output`: the output pdf file name.  Has to be pdf!
-1. `curves`: the output data helper file name.
+1. `curves`: the output DH file name.
 1. `reference`: where to take as the reference point.  We typically use 95%
-1. `prefix`: additional prefix to distinguish stuff in the data helper file
+1. `prefix`: additional prefix to distinguish stuff in the DH file
 1. `Do*`: a lot of booleans, all defaults to false.  The * can be {STAMuon, STADisplacedMuon, TkMuon, TkMuonStub, TkMuonStubS12, EG, EGExtended, EGTrack, Electron, ZElectron, IsoElectorn, Photon, PhotonPV, ElectronPV, PuppiJet, PuppiJetForMET, PuppiJetMin25, PuppiHT, PuppiMET, PFTau, PFIsoTau, CaloJet, CaloHT, TrackerJet, TrackerHT, TrackerMHT, TrackerMET, TkTau, CaloTkTau, TkEGTau, NNTauLoose, NNTauTight, CaloTau}.  Though it's best to look in the source code to see what is there
 
 The main work horse of this is the ProcessFile(...) function, which fits and produces one scaling line.  In case we need to fit new things, we have to add these functions in the code, with one of the `Do*` switch if possible, to make sure things don't litter around too much.  The function is defined as
 
-`void ProcessFile(PdfFileHelper &PdfFile, string FileName, string OutputFileName,
+``` c++
+void ProcessFile(PdfFileHelper &PdfFile, string FileName, string OutputFileName,
    string Prefix, vector<double> Thresholds,
    double Target, string Tag, string Name = "PT", int Type = TYPE_SMOOTH_SUPERTIGHT,
-   int Scaling = LINEAR)`
+   int Scaling = LINEAR)
+```
 
 Here are the meaning of each of the thing
 
 1. `PdfFileHelper &PdfFile`: this is one of the Yi helper class that makes multiple-page pdfs a breeze.  It makes the final pdf output file
 1. `string FileName`: the file that contains all the histograms
-1. `string OutputFileName`: the data helper file filename.
+1. `string OutputFileName`: the DH file filename.
 1. `string Prefix`: the directory to use in the histogram file
 1. `vector<double> Thresholds`: what thresholds to use in the scan
 1. `double Target`: the famous 98%, or some other number you like.  We pass it from command line
-1. `string Tag`: The tag to use to store the result in the data helper file
+1. `string Tag`: The tag to use to store the result in the DH file
 1. `string Name`: The middle part of histogram to use (for example the `PT` in `TkElectron_PT_000000`)
 1. `int Type`: what kind of fit to perform.  Several possibilies are coded
    1. `TYPE_FITFIX`: fits with the classic function `f(x)` we've been using for ages with three parameters: lambda, mu, sigma
@@ -104,10 +106,46 @@ Here are the meaning of each of the thing
 
 Note 1: The classic function is this one
 
-`f(x) = (ROOT::Math::normal_cdf([0]*(x-[1]), [0]*[2], 0) - exp(-[0]*(x-[1])+[0]*[0]*[2]*[2]/2)*ROOT::Math::normal
-_cdf([0]*(x-[1]), [0]*[2], [0]*[0]*[2]*[2]))`
+```
+f(x) = (ROOT::Math::normal_cdf([0]*(x-[1]), [0]*[2], 0) - exp(-[0]*(x-[1])+[0]*[0]*[2]*[2]/2)*ROOT::Math::normal
+_cdf([0]*(x-[1]), [0]*[2], [0]*[0]*[2]*[2]))```
 
 Note 2: Since we only care about the point where the turn on passes x% (usually 95%), the string model is a fine thing to use.  Sometimes the fit just won't converge for some strange reason.  And the string model is much more stable and flexible - for example if the detail of the turn on curve is not described well by the classic curve nor the tanh() around 10-30% turn on range, rather than finding the best curve to fit, we can use the string to go through the points and extract the 95% with good confidence.  
+
+
+
+### binary/ExportTextFile
+
+This executable makes the text file to interface with the rate part of menu code.
+
+There are two input arguments:
+1. `input`: the DH file file name that contains all the turn on fit results
+1. `output`: text file name to store the output
+
+For this usually we need to go into the code and change what is exported.  Putting everything from command line seems silly, and exporting all the unnecessary things from the DH file is not helpful either.  If you open the source code, you can see three blocks
+
+``` c++
+vector<pair<string, string>> GName =
+{
+   pair<string, string>("StandaloneMuonIsoTanh", "StandaloneMuon"),
+   ...
+}
+vector<pair<string, string>> TwoPartName =
+{
+   pair<string, string>("EG", "StandalonePhoton"),
+   ...
+};
+vector<pair<string, string>> QuadraticName =
+{
+   pair<string, string>("TrackerMHT5METFit", "TrackerMHTQuadratic")
+};
+```
+
+Each of the block contains a list of pairs.  First item in the pair is the identifier in the DH file.  Second item is the name you want it to appear in the final text file.
+
+The first block is simple linear scaling.  The second one will look for barrel and endcap ("EGBarrel", "EGEndcap") and add a if statement in the final text file.  The last one is for quadratic cases - not really used so far.
+
+
 
 
 ## Histogram structure
