@@ -34,6 +34,7 @@ Note:
 ## Setup (on lxplus)
 
 1. Setup a recent CMSSW environment
+1. Clone this repository (no restrictions on where)
 1. Make sure you have root and fastjet in PATH
 1. do `make` to compile everything
 1. test run by typing `make TestRun`
