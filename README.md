@@ -1,4 +1,27 @@
+
+
+
+
+
+
+
+
+
+
+
 # L1UpgradeStudies code
+
+Table of contents
+
+1. [Setup (on lxplus)](#setup-on-lxplus)
+1. [More information on the binaries](#more-information-on-the-binaries)
+   1. [binary/FillHistograms](#binaryfillhistograms)
+   1. [binary/PlotComparison](#binaryplotcomparison)
+   1. [binary/MakeScalingPlot](#binarymakescalingplot)
+   1. [binary/ExportTextFile](#binaryexporttextfile)
+1. [Histogram structure](#histogram-structure)
+
+
 
 This is the code to make turn on and efficiencies
 
