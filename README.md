@@ -1,14 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
 # L1UpgradeStudies code
 
 Table of contents
