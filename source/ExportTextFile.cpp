@@ -8,6 +8,7 @@ using namespace std;
 #include "TF1.h"
 
 #include "DataHelper.h"
+#include "CommandLine.h"
 
 int main(int argc, char *argv[]);
 void FillGraph(DataHelper &DHFile, string Tag, TGraph &G);
@@ -15,33 +16,37 @@ void FillReverseGraph(DataHelper &DHFile, string Tag, TGraph &G);
 
 int main(int argc, char *argv[])
 {
-   DataHelper DHFile("Curves.dh");
+   CommandLine CL(argc, argv);
+   string InputFileName = CL.Get("input");
+   string OutputFileName = CL.Get("output");
+
+   DataHelper DHFile(InputFileName);
    
-   ofstream OutputFile("Scalings.txt");
+   ofstream OutputFile(OutputFileName);
 
    vector<pair<string, string>> GName =
    {
-      pair<string, string>("StandaloneMuonIsoTanh", "StandaloneMuon"),
-      pair<string, string>("StandaloneDisplacedMuonIso", "StandaloneDisplacedMuon"),
-      pair<string, string>("TkMuon", "TkMuon"),
-      pair<string, string>("TkMuonStubIso", "TkMuonStub"),
-      pair<string, string>("TkMuonStubS12Iso", "TkMuonStubS12"),
-      pair<string, string>("PuppiJetFitFix2", "PuppiJet"),
-      pair<string, string>("PuppiHT30", "PuppiHT30"),
-      pair<string, string>("PuppiMET", "PuppiMET"),
-      pair<string, string>("TTbarPuppiJetMin25", "PuppiJetMin25"),
-      pair<string, string>("TTbarPuppiJetMin25ForwardFitFix2", "PuppiJetForwardMin25"),
-      pair<string, string>("PFTau", "PFTau"),
-      pair<string, string>("PFIsoTau", "PFIsoTau"),
-      pair<string, string>("TrackerJetFit", "TrackerJet"),
-      pair<string, string>("TrackerJetChargedFit", "TrackerJetCharged"),
-      pair<string, string>("TrackerHT5", "TrackerHT"),
-      pair<string, string>("TrackerHTCharged5", "TrackerHTCharged"),
-      pair<string, string>("TrackerMET", "TrackerMET"),
-      pair<string, string>("TkTau", "TkTau"),
-      pair<string, string>("CaloTkTau", "CaloTkTau"),
-      pair<string, string>("TkEGTau", "TkEGTau"),
-      pair<string, string>("TrackerMHT5METFit", "TrackerMHT")
+      // pair<string, string>("StandaloneMuonIsoTanh", "StandaloneMuon"),
+      // pair<string, string>("StandaloneDisplacedMuonIso", "StandaloneDisplacedMuon"),
+      // pair<string, string>("TkMuon", "TkMuon"),
+      // pair<string, string>("TkMuonStubIso", "TkMuonStub"),
+      // pair<string, string>("TkMuonStubS12Iso", "TkMuonStubS12"),
+      // pair<string, string>("PuppiJetFitFix2", "PuppiJet"),
+      // pair<string, string>("PuppiHT30", "PuppiHT30"),
+      // pair<string, string>("PuppiMET", "PuppiMET"),
+      // pair<string, string>("TTbarPuppiJetMin25", "PuppiJetMin25"),
+      // pair<string, string>("TTbarPuppiJetMin25ForwardFitFix2", "PuppiJetForwardMin25"),
+      // pair<string, string>("PFTau", "PFTau"),
+      // pair<string, string>("PFIsoTau", "PFIsoTau"),
+      // pair<string, string>("TrackerJetFit", "TrackerJet"),
+      // pair<string, string>("TrackerJetChargedFit", "TrackerJetCharged"),
+      // pair<string, string>("TrackerHT5", "TrackerHT"),
+      // pair<string, string>("TrackerHTCharged5", "TrackerHTCharged"),
+      // pair<string, string>("TrackerMET", "TrackerMET"),
+      // pair<string, string>("TkTau", "TkTau"),
+      // pair<string, string>("CaloTkTau", "CaloTkTau"),
+      // pair<string, string>("TkEGTau", "TkEGTau"),
+      // pair<string, string>("TrackerMHT5METFit", "TrackerMHT")
    };
    vector<pair<string, string>> TwoPartName =
    {
@@ -49,15 +54,15 @@ int main(int argc, char *argv[])
       pair<string, string>("EGTrackID", "StandaloneElectron"),
       pair<string, string>("TkElectronTrackID", "TkElectron"),
       pair<string, string>("TkIsoElectron", "TkIsoElectron"),
-      pair<string, string>("TkIsoPhotonTrackID", "TkIsoPhoton"),
-      pair<string, string>("TkIsoPhotonPVTrackID", "TkIsoPhotonPV"),
-      pair<string, string>("TkIsoElectronPV", "TkIsoElectronPV"),
-      pair<string, string>("CaloJet", "CaloJet"),
-      pair<string, string>("QCDCaloJet", "QCDCaloJet")
+      // pair<string, string>("TkIsoPhotonTrackID", "TkIsoPhoton"),
+      // pair<string, string>("TkIsoPhotonPVTrackID", "TkIsoPhotonPV"),
+      // pair<string, string>("TkIsoElectronPV", "TkIsoElectronPV"),
+      // pair<string, string>("CaloJet", "CaloJet"),
+      // pair<string, string>("QCDCaloJet", "QCDCaloJet")
    };
    vector<pair<string, string>> QuadraticName =
    {
-      pair<string, string>("TrackerMHT5METFit", "TrackerMHTQuadratic")
+      // pair<string, string>("TrackerMHT5METFit", "TrackerMHTQuadratic")
    };
 
 
