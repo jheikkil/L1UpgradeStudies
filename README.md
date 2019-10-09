@@ -77,6 +77,8 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<your path>/fastjet/lib
 export PATH=${PATH}:<your path>/fastjet/bin/
 ```
 
+You can test if the setup is correct by running `fastjet-config` and see if you get anything.
+
 
 ## More information on the binaries
 
