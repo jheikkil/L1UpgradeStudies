@@ -36,12 +36,45 @@ Note:
 
 ## Setup (on lxplus)
 
-1. Setup a recent CMSSW environment
-1. Clone this repository (no restrictions on where)
-1. Make sure you have root and fastjet in PATH
-1. do `make` to compile everything
-1. test run by typing `make TestRun`
+1. Setup a recent CMSSW environment. For example if you want to use CMSSW_10_4_0:
+```
+cmsrel CMSSW_10_4_0
+cd CMSSW_10_4_0/src
+cmsenv
+```
+The code is not tied with
+2. Clone this repository (no restrictions on where)
+```
+git clone https://github.com/FHead/L1UpgradeStudies.git AwesomeCode
+```
+3. Make sure you have `root` and `fastjet` in PATH
+4. do `make` to compile everything
+```
+cd AwesomeCode
+make
+```
+5. test run by typing `make TestRun`
 
+Take a look at the makefile for the TestRun for an example on how to run everything.
+
+
+
+### Side note: if you don't see fastjet
+
+This can be done for example to have a quick fastjet installation
+```
+mkdir -p fastjet/tarfiles
+cd fastjet/tarfiles
+curl -O http://fastjet.fr/repo/fastjet-3.3.2.tar.gz 
+tar xvfz fastjet-3.3.2.tar.gz 
+mv fastjet-3.3.2 ../3.3.2
+cd ../3.3.2/
+./configure --prefix=$PWD/../
+make -j 10
+make install
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<your path>/fastjet/lib
+export PATH=${PATH}:<your path>/fastjet/bin/
+```
 
 
 ## More information on the binaries
