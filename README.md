@@ -42,7 +42,8 @@ cmsrel CMSSW_10_4_0
 cd CMSSW_10_4_0/src
 cmsenv
 ```
-The code is not tied with
+The code is not tied with any specific CMSSW version
+
 2. Clone this repository (no restrictions on where)
 ```
 git clone https://github.com/FHead/L1UpgradeStudies.git AwesomeCode
