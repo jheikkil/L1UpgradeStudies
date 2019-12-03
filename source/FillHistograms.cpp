@@ -134,9 +134,24 @@ int main(int argc, char *argv[])
    string OutputFileName         = CL.Get("output");
    bool UseStoredGen             = CL.GetBool("StoredGen", true);
    string ConfigFileName         = CL.Get("config");
+   bool LDROnly                  = CL.GetBool("LDROnly", false);
+   bool RejectLeptonicW          = CL.GetBool("RejectLeptonicW", false);
 
    vector<Configuration> Configurations = ReadConfigFile(ConfigFileName);
    int N = Configurations.size();
+
+   if(LDROnly == true)
+   {
+      for(int i = 0; i < (int)Configurations.size(); i++)
+      {
+         if(Configurations[i].Directory.find("LDR") == string::npos)
+         {
+            Configurations.erase(Configurations.begin() + i);
+            i = i - 1;
+         }
+      }
+      N = Configurations.size();
+   }
 
    // Output File and directories for better organization
    TFile OutputFile(OutputFileName.c_str(), "RECREATE");
@@ -148,10 +163,10 @@ int main(int argc, char *argv[])
    // Create histograms
    vector<double> GenThresholds = {0};
    vector<double> JetThresholds = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60,
-      75, 80, 85, 90, 100, 125, 150, 175, 200, 225, 250, 275, 300};
-   vector<double> MuonThresholds = {0, 3, 5, 7, 9, 12, 14, 15, 17, 20, 22, 25, 27, 30};
+      75, 80, 85, 90, 100, 120, 125, 150, 175, 200, 225, 250, 275, 300};
+   vector<double> MuonThresholds = {0, 2, 3, 4, 5, 7, 9, 10, 12, 14, 15, 17, 20, 22, 25, 27, 30};
    vector<double> TauThresholds = {0, 5, 7, 9, 12, 14, 15, 17, 20, 22, 25, 27, 30, 40, 50, 60, 70, 80, 90, 100};
-   vector<double> EGThresholds = {0, 5, 7, 9, 12, 14, 15, 17, 20, 22, 25, 27, 30};
+   vector<double> EGThresholds = {0, 5, 7, 9, 12, 14, 15, 17, 20, 22, 25, 27, 30, 40, 50};
    vector<double> HTThresholds = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 125, 150,
       175, 200, 225, 250, 300, 325, 350, 375, 400, 425, 450, 475, 500};
    
@@ -190,7 +205,7 @@ int main(int argc, char *argv[])
 
       // Messengers
       L1GenMessenger MGen(File, "genTree/L1GenTree");
-      L1PhaseIITreeV8p2Messenger MPhaseII(File, "l1PhaseIITree/L1PhaseIITree");
+      L1PhaseIITreeV10p4Messenger MPhaseII(File, "l1PhaseIITree/L1PhaseIITree");
 
       if(MGen.Tree == nullptr || MPhaseII.Tree == nullptr)
          continue;
@@ -207,13 +222,20 @@ int main(int argc, char *argv[])
          MGen.GetEntry(iE);
          MPhaseII.GetEntry(iE);
 
+         bool LeptonicW = CheckLeptonicW(MGen);
+         if(RejectLeptonicW == true && LeptonicW == true)
+            continue;
+
          vector<FourVector> Electrons;
          vector<FourVector> ZElectrons;
          vector<FourVector> Photons;
          vector<FourVector> Muons;
          vector<int> MuonSigns;
          vector<double> MuonDXY;
-         vector<FourVector> Taus;
+         vector<FourVector> MuonLxy1000s;
+         vector<int> MuonSignLxy1000s;
+         vector<double> MuonDXYLxy1000;
+         vector<FourVector> Taus, VisTaus;
          vector<FourVector> ChargedParticles;
          vector<FourVector> Particles;
 
@@ -238,12 +260,19 @@ int main(int argc, char *argv[])
                Muons.push_back(MGen.GenP[i]);
                MuonSigns.push_back((MGen.GenID[i] > 0) ? -1 : 1);
                MuonDXY.push_back(fabs(MGen.GenDxy[i]));
+
+               if(fabs(MGen.GenLxy[i]) < 100)   // 1 meter
+               {
+                  MuonLxy1000s.push_back(MGen.GenP[i]);
+                  MuonSignLxy1000s.push_back((MGen.GenID[i] > 0) ? -1 : 1);
+                  MuonDXYLxy1000.push_back(fabs(MGen.GenDxy[i]));
+               }
             }
             if(AbsID == 15)
             {
-               // FourVector P = GetVisTauAdhoc(MGen, i);
-               // if(P[0] > 0)
-               //    Taus.push_back(P);
+               FourVector P = GetVisTauAdhoc(MGen, i);
+               if(P[0] > 0)
+                  VisTaus.push_back(P);
                Taus.push_back(MGen.GenP[i]);
             }
 
@@ -291,6 +320,17 @@ int main(int argc, char *argv[])
                if(BestIndex < 0)   BestDXY = 0;
                else                BestDXY = MuonDXY[BestIndex];
             }
+            else if(C.ReferenceObject == "MuonLxy1000")
+            {
+               Best = BestInRange(MuonLxy1000s, C.AbsEtaMin, C.AbsEtaMax, -1);
+               int BestIndex = BestIndexInRange(MuonLxy1000s, C.AbsEtaMin, C.AbsEtaMax, -1);
+               if(BestIndex < 0)   BestSign = -999;
+               else                BestSign = MuonSignLxy1000s[BestIndex];
+               if(BestIndex < 0)   BestDXY = 0;
+               else                BestDXY = MuonDXYLxy1000[BestIndex];
+            }
+            else if(C.ReferenceObject == "VisTau")
+               Best = BestInRange(VisTaus, C.AbsEtaMin, C.AbsEtaMax, -1);
             else if(C.ReferenceObject == "Tau")
                Best = BestInRange(Taus, C.AbsEtaMin, C.AbsEtaMax, -1);
             else if(C.ReferenceObject == "HT5")
@@ -377,14 +417,20 @@ int main(int argc, char *argv[])
                Quality = QUAL_ODD;
             else if(C.Quality == "Twelve")
                Quality = QUAL_12;
+            else if(C.Quality == "OverlapTwelve")
+               Quality = QUAL_OVERLAP12;
             else if(C.Quality == "TwelveDXYOne")
                Quality = QUAL_12_DXY1;
+            else if(C.Quality == "DXYOne")
+               Quality = QUAL_DXY1;
             else if(C.Quality == "BarrelOddEndcapTwo")
                Quality = QUAL_BARRELODDENDCAP2;
             else if(C.Quality == "BarrelNoneEndcapTwo")
                Quality = QUAL_BARRELNONEENDCAP2;
             else if(C.Quality == "BarrelNoneEndcapThree")
                Quality = QUAL_BARRELNONEENDCAP3;
+            else if(C.Quality == "BarrelNoneEndcapFive")
+               Quality = QUAL_BARRELNONEENDCAP5;
             else if(C.Quality == "UseFlag")
                Quality = QUAL_USEFLAG;
             else
@@ -397,35 +443,17 @@ int main(int argc, char *argv[])
             if(C.InputObject == "Gen")
                Best.P = ReferenceObjects[i];
             else if(C.InputObject == "TrackerJet")
-            {
                Best = BestInRange(MPhaseII.TrackerJet, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "TkCaloJet")
-            {
                Best = BestInRange(MPhaseII.TkCaloJet, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "PuppiJet")
-            {
                Best = BestInRange(MPhaseII.PuppiJet, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "CaloJet")
-            {
                Best = BestInRange(MPhaseII.CaloJet, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
+            else if(C.InputObject == "PFPhase1Jet")
+               Best = BestInRange(MPhaseII.PFPhase1Jet, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
             else if(C.InputObject == "GlobalMuon")
-            {
                Best = BestInRange(MPhaseII.GlobalMuon, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "StandaloneMuon")
                Best = BestInRange(MPhaseII.StandaloneMuon, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
             else if(C.InputObject == "StandaloneDisplacedMuon")
@@ -435,71 +463,27 @@ int main(int argc, char *argv[])
             else if(C.InputObject == "TkMuonStub")
                Best = BestInRange(MPhaseII.TkMuonStub, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
             else if(C.InputObject == "TkGlbMuon")
-            {
                Best = BestInRange(MPhaseII.TkGlbMuon, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "PFMuon")
-            {
                Best = BestInRange(MPhaseII.PFMuon, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "EG")
-            {
                Best = BestInRange(MPhaseII.EG, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "EGTrackID")
-            {
                Best = BestInRange(MPhaseII.EGTrackID, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "TkElectron")
-            {
                Best = BestInRange(MPhaseII.TkElectron, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "TkElectronTrackID")
-            {
                Best = BestInRange(MPhaseII.TkElectronTrackID, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
-            else if(C.InputObject == "TkElectronLoose")
-            {
-               Best = BestInRange(MPhaseII.TkElectronLoose, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
-            else if(C.InputObject == "TkElectronLooseTrackID")
-            {
-               Best = BestInRange(MPhaseII.TkElectronLooseTrackID, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
+            else if(C.InputObject == "TkElectronV2")
+               Best = BestInRange(MPhaseII.TkElectronV2, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
+            else if(C.InputObject == "TkElectronV2TrackID")
+               Best = BestInRange(MPhaseII.TkElectronV2TrackID, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
             else if(C.InputObject == "TkPhoton")
-            {
                Best = BestInRange(MPhaseII.TkPhoton, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "TkPhotonTrackID")
-            {
                Best = BestInRange(MPhaseII.TkPhotonTrackID, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "TkPhotonPVTrackID")
-            {
                Best = BestInRange(MPhaseII.TkPhotonPVTrackID, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "TkElectronPV")
             {
                double IsoBB, IsoEC;
@@ -518,79 +502,45 @@ int main(int argc, char *argv[])
                   Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
             }
             else if(C.InputObject == "TkTau")
-            {
                Best = BestInRange(MPhaseII.TkTau, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "CaloTkTau")
-            {
                Best = BestInRange(MPhaseII.CaloTkTau, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "TkEGTau")
-            {
                Best = BestInRange(MPhaseII.TkEGTau, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "PFTau")
                Best = BestInRange(MPhaseII.PFTau, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
             else if(C.InputObject == "NNTau")
                Best = BestInRange(MPhaseII.NNTau, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
             else if(C.InputObject == "NNTauLoose")
                Best = BestInRange(MPhaseII.NNTauLoose, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
+            else if(C.InputObject == "NNPFTau")
+               Best = BestInRange(MPhaseII.NNPFTau, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
+            else if(C.InputObject == "NNPFTauLoose")
+               Best = BestInRange(MPhaseII.NNPFTauLoose, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
+            else if(C.InputObject == "HPSTau")
+               Best = BestInRange(MPhaseII.HPSTau, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
             else if(C.InputObject == "CaloTau")
-            {
                Best = BestInRange(MPhaseII.CaloTau, Ref, C.AbsEtaMin, C.AbsEtaMax, C.PTMin, C.DRCut, Quality, Range, C.IsolationBB, C.IsolationEC);
-               if(Best.P[0] < 0)
-                  Best.Type = ((Ref.GetAbsEta() < 1.5) ? 0 : 1);
-            }
             else if(C.InputObject == "TrackerHT0")
                Best = MPhaseII.TrackerHT[0];
             else if(C.InputObject == "TrackerMHT0")
                Best = MPhaseII.TrackerMHT[0];
-            else if(C.InputObject == "TrackerHT1")
-               Best = MPhaseII.TrackerHT[1];
-            else if(C.InputObject == "TrackerMHT1")
-               Best = MPhaseII.TrackerMHT[1];
-            else if(C.InputObject == "TrackerHT2")
-               Best = MPhaseII.TrackerHT[2];
-            else if(C.InputObject == "TrackerMHT2")
-               Best = MPhaseII.TrackerMHT[2];
-            else if(C.InputObject == "TrackerHT3")
-               Best = MPhaseII.TrackerHT[3];
-            else if(C.InputObject == "TrackerMHT3")
-               Best = MPhaseII.TrackerMHT[3];
-            else if(C.InputObject == "TrackerHT4")
-               Best = MPhaseII.TrackerHT[4];
-            else if(C.InputObject == "TrackerMHT4")
-               Best = MPhaseII.TrackerMHT[4];
             else if(C.InputObject == "TrackerMET")
                Best = MPhaseII.TrackerMET[0];
             else if(C.InputObject == "PuppiHT0")
                Best = MPhaseII.PuppiHT[0];
             else if(C.InputObject == "PuppiMHT0")
                Best = MPhaseII.PuppiMHT[0];
-            else if(C.InputObject == "PuppiHT1")
-               Best = MPhaseII.PuppiHT[1];
-            else if(C.InputObject == "PuppiMHT1")
-               Best = MPhaseII.PuppiMHT[1];
-            else if(C.InputObject == "PuppiHT2")
-               Best = MPhaseII.PuppiHT[2];
-            else if(C.InputObject == "PuppiMHT2")
-               Best = MPhaseII.PuppiMHT[2];
             else if(C.InputObject == "PuppiMET")
                Best = MPhaseII.PuppiMET[0];
+            else if(C.InputObject == "PFPhase1HT0")
+               Best = MPhaseII.PFPhase1HT[0];
+            else if(C.InputObject == "PFPhase1MHT0")
+               Best = MPhaseII.PFPhase1MHT[0];
             else if(C.InputObject == "CaloHT0")
                Best = MPhaseII.CaloJetHT[0];
             else if(C.InputObject == "CaloMHT0")
                Best = MPhaseII.CaloJetMHT[0];
-            else if(C.InputObject == "CaloHT1")
-               Best = MPhaseII.CaloJetHT[1];
-            else if(C.InputObject == "CaloMHT1")
-               Best = MPhaseII.CaloJetMHT[1];
 
             L1Objects.push_back(Best);
          }
