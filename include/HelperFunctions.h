@@ -27,6 +27,7 @@ using namespace std;
 #define QUAL_BARRELNONEENDCAP5 -10
 #define QUAL_DXY1 -11
 #define QUAL_OVERLAP12 -12
+#define QUAL_REGIONNOTFOUR -14
 
 int BestIndexInRange(vector<FourVector> &List, double AbsEta, double PTMin);
 FourVector BestInRange(vector<FourVector> &List, double AbsEta, double PTMin);
