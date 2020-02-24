@@ -162,13 +162,13 @@ int main(int argc, char *argv[])
 
    // Create histograms
    vector<double> GenThresholds = {0};
-   vector<double> JetThresholds = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60,
-      75, 80, 85, 90, 100, 120, 125, 150, 175, 200, 225, 250, 275, 300};
+   vector<double> JetThresholds = {0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70,
+      75, 80, 85, 90, 100, 120, 125, 130, 140, 150, 175, 200, 225, 250, 275, 300};
    vector<double> MuonThresholds = {0, 2, 3, 4, 5, 7, 9, 10, 12, 14, 15, 17, 20, 22, 25, 27, 30};
-   vector<double> TauThresholds = {0, 5, 7, 9, 12, 14, 15, 17, 20, 22, 25, 27, 30, 40, 50, 60, 70, 80, 90, 100};
+   vector<double> TauThresholds = {0, 5, 7, 9, 12, 14, 15, 17, 20, 22, 25, 27, 30, 35, 36, 40, 46, 50, 58, 60, 70, 80, 90, 100};
    vector<double> EGThresholds = {0, 5, 7, 9, 12, 14, 15, 17, 20, 22, 25, 27, 30, 40, 50};
-   vector<double> HTThresholds = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 125, 150,
-      175, 200, 225, 250, 300, 325, 350, 375, 400, 425, 450, 475, 500};
+   vector<double> HTThresholds = {0, 10, 20, 30, 40, 50, 60, 70, 80, 82, 90, 100, 112, 125, 150,
+      175, 184, 200, 225, 250, 300, 325, 326, 350, 370, 375, 400, 425, 450, 475, 500, 550, 600, 650};
    
    vector<Histograms *> ObjectHistograms;
    for(int i = 0; i < N; i++)
@@ -433,6 +433,8 @@ int main(int argc, char *argv[])
                Quality = QUAL_BARRELNONEENDCAP5;
             else if(C.Quality == "UseFlag")
                Quality = QUAL_USEFLAG;
+            else if(C.Quality == "RegionNotFour")
+               Quality = QUAL_REGIONNOTFOUR;
             else
                Quality = atoi(C.Quality.c_str());
 

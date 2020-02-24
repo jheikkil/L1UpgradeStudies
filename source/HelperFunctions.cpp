@@ -66,6 +66,8 @@ int BestIndexInRange(vector<GenericObject> &List, FourVector &Reference, double 
          continue;
       if(Qual == QUAL_QUALANDFLAG && List[i].Flag == false)
          continue;
+      if(Qual == QUAL_REGIONNOTFOUR && List[i].Type == 4)
+         continue;
       if(Type >= 0 && List[i].Type != Type)
          continue;
       if(GetDR(List[i].P, Reference) <= DRMax)
@@ -120,6 +122,8 @@ GenericObject BestInRange(vector<GenericObject> &List, FourVector &Reference, do
       if(Qual == QUAL_QUALANDFLAG && List[i].Qual == 0)
          continue;
       if(Qual == QUAL_QUALANDFLAG && List[i].Flag == false)
+         continue;
+      if(Qual == QUAL_REGIONNOTFOUR && List[i].Type == 4)
          continue;
       if(Type >= 0 && List[i].Type != Type)
          continue;

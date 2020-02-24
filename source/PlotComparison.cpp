@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
    DefaultColors[4] = TColor::GetColor("#7F7F7F");
    DefaultColors[5] = kMagenta;
 
+   int DefaultMarkers[6] = {20, 20, 20, 20, 20, 20};
+
    CommandLine CL(argc, argv);
 
    vector<string> Labels       = CL.GetStringVector("label");
@@ -42,7 +44,9 @@ int main(int argc, char *argv[])
    double YMin                 = CL.GetDouble("ymin", 0.0);
    double YMax                 = CL.GetDouble("ymax", 1.1);
    vector<int> Colors          = CL.GetIntVector("color", vector<int>(DefaultColors, DefaultColors + 6));
+   vector<int> Markers         = CL.GetIntVector("marker", vector<int>(DefaultMarkers, DefaultMarkers + 6));
    vector<double> Lines        = CL.GetDoubleVector("line", vector<double>({1.00}));
+   vector<string> Texts        = CL.GetStringVector("text", vector<string>());
    bool Grid                   = CL.GetBool("grid", false);
    bool LogY                   = CL.GetBool("logy", false);
    double LegendX              = CL.GetDouble("legendx", 0.35);
@@ -64,6 +68,10 @@ int main(int argc, char *argv[])
    Assert(N == Labels.size(),       "Number of files != number of labels");
    Assert(N == Numerators.size(),   "Number of files != number of numberators");
    Assert(N == Denominators.size(), "Number of files != number of denominators");
+   Assert(N <= Colors.size(),       "Please specify line colors");
+
+   if(N > Markers.size())
+      Markers.insert(Markers.end(), N - Markers.size(), 20);
 
    bool DavignonStyle          = CL.GetBool("Davignon", false);
    if(DavignonStyle == false)
@@ -162,20 +170,42 @@ int main(int argc, char *argv[])
    for(int i = 0; i < N; i++)
    {
       Graphs[i].SetMarkerColor(Colors[i]);
-      Graphs[i].SetMarkerStyle(20);
+      Graphs[i].SetMarkerStyle(Markers[i]);
+      Graphs[i].SetMarkerSize(1.25);
       Graphs[i].SetLineColor(Colors[i]);
       Graphs[i].SetLineWidth(2);
       Graphs[i].Draw("pl");
    }
 
-   TLegend Legend(LegendX, LegendY, LegendX + 0.3, LegendY + 0.06 * N);
+   int LegendCount = 0;
+   for(int i = 0; i < N; i++)
+      if(Labels[i] != "NONE")
+         LegendCount = LegendCount + 1;
+   TLegend Legend(LegendX, LegendY, LegendX + 0.3, LegendY + 0.06 * LegendCount);
    Legend.SetTextFont(42);
    Legend.SetTextSize(0.035);
    Legend.SetBorderSize(0);
    Legend.SetFillStyle(0);
    for(int i = 0; i < N; i++)
-      Legend.AddEntry(&Graphs[i], Labels[i].c_str(), "pl");
+      if(Labels[i] != "NONE")
+         Legend.AddEntry(&Graphs[i], Labels[i].c_str(), "pl");
    Legend.Draw();
+
+   if(Texts.size() > 0)
+   {
+      TLatex Latex;
+      Latex.SetNDC();
+      Latex.SetTextFont(42);
+      Latex.SetTextSize(0.035);
+      Latex.SetTextAlign(11);
+
+      for(int i = 0; i + 3 <= (int)Texts.size(); i = i + 3)
+      {
+         double x = atof(Texts[i+0].c_str());
+         double y = atof(Texts[i+1].c_str());
+         Latex.DrawLatex(x, y, Texts[i+2].c_str());
+      }
+   }
 
    if(DavignonStyle == true)
    {
