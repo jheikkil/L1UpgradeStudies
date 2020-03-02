@@ -159,14 +159,12 @@ int main(int argc, char *argv[])
 
      // Matched tree
    TTree *OutputTree = nullptr;
-   TTree *EventTree = nullptr;
    double GenPT, GenEta, GenPhi;
    double L1PT, L1Eta, L1Phi;
    string CurrentFileName;
    int EventIndex;
    int EntryIndex;
    int EventNumber;
-   ULong64_t event;
 
    if(DoTree == true)
    {
@@ -237,10 +235,8 @@ int main(int argc, char *argv[])
       // Messengers
       L1GenMessenger MGen(File, "genTree/L1GenTree");
       L1PhaseIITreeV10p4Messenger MPhaseII(File, "l1PhaseIITree/L1PhaseIITree");
-
-      if(DoTree == true)
-           EventTree = (TTree *)File.Get("l1EventTree/L1EventTree");
-           EventTree->SetBranchAddress("event", &event);
+      //if(DoTree == true)
+      L1NTupleMessenger MEvent(File, "l1EventTree/L1EventTree");
 
       if(MGen.Tree == nullptr || MPhaseII.Tree == nullptr)
          continue;
@@ -253,11 +249,8 @@ int main(int argc, char *argv[])
       {
          if(DoTree == true)
             EventIndex = iE;
-            //EventTree = (TTree *)File.Get("l1EventTree/L1EventTree");
-           //EventTree->SetBranchAddress("event", &event);
-            EventTree->GetEntry(iE);
-            cout<<event<<endl;
-            EventNumber=event;
+            MEvent.GetEntry(iE);
+            EventNumber=MEvent.Event->event;
 
          Bar.Update(iE);
          Bar.Print();
