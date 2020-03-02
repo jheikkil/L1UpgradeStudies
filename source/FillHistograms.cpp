@@ -132,6 +132,7 @@ int main(int argc, char *argv[])
    // Get arguments
    vector<string> InputFileNames = CL.GetStringVector("input", ',');
    string OutputFileName         = CL.Get("output");
+   bool DoTree                   = CL.GetBool("tree", false);
    bool UseStoredGen             = CL.GetBool("StoredGen", true);
    string ConfigFileName         = CL.Get("config");
    bool LDROnly                  = CL.GetBool("LDROnly", false);
@@ -155,6 +156,33 @@ int main(int argc, char *argv[])
 
    // Output File and directories for better organization
    TFile OutputFile(OutputFileName.c_str(), "RECREATE");
+
+     // Matched tree
+   TTree *OutputTree = nullptr;
+   TTree *EventTree = nullptr;
+   double GenPT, GenEta, GenPhi;
+   double L1PT, L1Eta, L1Phi;
+   string CurrentFileName;
+   int EventIndex;
+   int EntryIndex;
+   int EventNumber;
+   ULong64_t event;
+
+   if(DoTree == true)
+   {
+      OutputTree = new TTree("MatchedTree", "Matched tree");
+
+      OutputTree->Branch("EventNumber", &EventNumber, "EventNumber/I");
+      OutputTree->Branch("GenPT", &GenPT, "GenPT/D");
+      OutputTree->Branch("GenEta", &GenEta, "GenEta/D");
+      OutputTree->Branch("GenPhi", &GenPhi, "GenPhi/D");
+      OutputTree->Branch("L1PT", &L1PT, "L1PT/D");
+      OutputTree->Branch("L1Eta", &L1Eta, "L1Eta/D");
+      OutputTree->Branch("L1Phi", &L1Phi, "L1Phi/D");
+      OutputTree->Branch("File", &CurrentFileName);
+      OutputTree->Branch("EventIndex", &EventIndex, "EventIndex/I");
+      OutputTree->Branch("Index", &EntryIndex, "EntryIndex/I");
+   }
 
    vector<TDirectory *> Directories;
    for(int i = 0; i < N; i++)
@@ -198,6 +226,9 @@ int main(int argc, char *argv[])
 
    for(string InputFileName : InputFileNames)
    {
+      if(DoTree == true)
+         CurrentFileName = InputFileName;
+
       cout << "Processing file " << InputFileName << endl;
 
       // Input File
@@ -206,6 +237,10 @@ int main(int argc, char *argv[])
       // Messengers
       L1GenMessenger MGen(File, "genTree/L1GenTree");
       L1PhaseIITreeV10p4Messenger MPhaseII(File, "l1PhaseIITree/L1PhaseIITree");
+
+      if(DoTree == true)
+           EventTree = (TTree *)File.Get("l1EventTree/L1EventTree");
+           EventTree->SetBranchAddress("event", &event);
 
       if(MGen.Tree == nullptr || MPhaseII.Tree == nullptr)
          continue;
@@ -216,6 +251,14 @@ int main(int argc, char *argv[])
 
       for(int iE = 0; iE < EntryCount; iE++)
       {
+         if(DoTree == true)
+            EventIndex = iE;
+            //EventTree = (TTree *)File.Get("l1EventTree/L1EventTree");
+           //EventTree->SetBranchAddress("event", &event);
+            EventTree->GetEntry(iE);
+            cout<<event<<endl;
+            EventNumber=event;
+
          Bar.Update(iE);
          Bar.Print();
 
@@ -554,6 +597,24 @@ int main(int argc, char *argv[])
          // Fill Histograms
          for(int i = 0; i < N; i++)
             FillHistograms(ObjectHistograms[i], L1Objects[i].P, ReferenceObjects[i], L1Objects[i].Iso, L1Objects[i].Type, ReferenceDXY[i]);
+
+         if(DoTree == true)
+         {
+            for(int i = 0; i < N; i++)
+            {
+               EntryIndex = i;
+
+               GenPT  = ReferenceObjects[i].GetPT();
+               GenEta = ReferenceObjects[i].GetEta();
+               GenPhi = ReferenceObjects[i].GetPhi();
+               L1PT   = L1Objects[i].P.GetPT();
+               L1Eta  = L1Objects[i].P.GetEta();
+               L1Phi  = L1Objects[i].P.GetPhi();
+
+               OutputTree->Fill();
+            }
+         }
+
       }
 
       Bar.Update(EntryCount);
@@ -566,6 +627,12 @@ int main(int argc, char *argv[])
    // Write result to file
    for(int i = 0; i < N; i++)
       ObjectHistograms[i]->Write(Directories[i]);
+
+   if(DoTree == true)
+   {
+      OutputFile.cd();
+      OutputTree->Write();
+   }
 
    // Clean up
    OutputFile.Close();
