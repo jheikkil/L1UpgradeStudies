@@ -102,8 +102,8 @@ IndexPHP = /eos/user/j/jheikkil/www/L1Trigger/index.php
 
 myfillhistograms: binary/FillHistograms
 	mkdir -p output
-	binary/FillHistograms --input `ls $(SingleEle2)/* | tr '\n' ',' | sed "s/,$$//g"` \
-		--output $(OutputHists) --StoredGen true --config config/mycustom.config
+	binary/FillHistograms --input `ls $(SingleEle2)/* | head -n 1 | tr '\n' ',' | sed "s/,$$//g"` \
+		--output $(OutputHists) --StoredGen true --tree true --config config/mycustom.config
 
 MatchingEff_EG_TkE_PT_TESTI: binary/PlotComparison
 	mkdir -p png

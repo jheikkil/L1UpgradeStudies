@@ -235,11 +235,15 @@ int main(int argc, char *argv[])
       // Messengers
       L1GenMessenger MGen(File, "genTree/L1GenTree");
       L1PhaseIITreeV10p4Messenger MPhaseII(File, "l1PhaseIITree/L1PhaseIITree");
-      //if(DoTree == true)
       L1NTupleMessenger MEvent(File, "l1EventTree/L1EventTree");
 
       if(MGen.Tree == nullptr || MPhaseII.Tree == nullptr)
          continue;
+
+      if(DoTree == true && MEvent.Tree == nullptr){
+          cout<<"No necessary information to produce tree with event information --- setting DoTree to False"<<endl;
+          DoTree=false;
+      }
 
       // Loop over events
       int EntryCount = MGen.Tree->GetEntries();
@@ -247,10 +251,11 @@ int main(int argc, char *argv[])
 
       for(int iE = 0; iE < EntryCount; iE++)
       {
-         if(DoTree == true)
+         if(DoTree == true){
             EventIndex = iE;
             MEvent.GetEntry(iE);
             EventNumber=MEvent.Event->event;
+         }
 
          Bar.Update(iE);
          Bar.Print();
