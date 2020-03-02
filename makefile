@@ -90,15 +90,19 @@ DYLL_V10p7 = /eos/cms/store/group/cmst3/group/l1tr/cepeda/triggerntuplesTDR/DYTo
 DYLL_V7p5p2 = /eos/cms/store/cmst3/group/l1tr/cepeda/triggerntuples10X/DYToLL_M-50_14TeV_TuneCP5_pythia8/crab_DYLL_200PU_V7_5_2/190324_103140/0000//
 DYLL_V10    = /eos/cms/store/group/cmst3/group/l1tr/cepeda/triggerntuplesTDR/DYToLL_V10_1/NTP/v1/
 PrivateSample    = /afs/cern.ch/work/p/pmeiring/private/CMS/CMSSW_10_6_1_patch2/src/L1Trigger/L1TCommon/test/PrivateSamples/
+SingleEle = /eos/cms/store/user/jheikkil/ntuples/SingleE_FlatPt-2to100/SingleE_FlatPt-2to100_PU200_v47/200224_161731/0000
+SinglePhoton = /eos/cms/store/user/jheikkil/ntuples/SinglePhoton_FlatPt-8to150/SinglePhoton_FlatPt-8to150_PU200_v47/200225_161654/0000/
+SingleEle2 = /eos/cms/store/user/jheikkil/TRG3/SingleE_FlatPt-2to100/SingleE_FlatPt-2to100_PU200_v47/200226_134632/0000/
+MariaDY = ~cepeda/public/L1NtuplePhaseII_MTD_EGCheck.root
 
-OutputHists = output/DYLL_V10p7_0702_20_Zincl.root
-OutputHists2 = output/DYLL_V10p7_0702_20.root
-OutputEOS = /eos/user/j/jheikkil/www/L1Trigger/DYLL_V10p7_1202_20
+OutputHists = output/MariaDY.root
+OutputHists2 = output/DYLL_V10p7_0702_20_Zincl.root
+OutputEOS = /eos/user/j/jheikkil/www/L1Trigger/SingleEle
 IndexPHP = /eos/user/j/jheikkil/www/L1Trigger/index.php
 
 myfillhistograms: binary/FillHistograms
 	mkdir -p output
-	binary/FillHistograms --input `ls $(DYLL_V10p7)/* | tr '\n' ',' | sed "s/,$$//g"` \
+	binary/FillHistograms --input `ls $(MariaDY) | tr '\n' ',' | sed "s/,$$//g"` \
 		--output $(OutputHists) --StoredGen true --config config/mycustom.config
 
 MatchingEff_EG_TkE_PT_TESTI: binary/PlotComparison
@@ -189,10 +193,35 @@ TurnOn_EG_TkE_PT35_Etabinned: binary/PlotComparison
 		--file $(OutputHists),$(OutputHists) \
 		--numerator "EGTrackID_EtaPT35_002500","TkElectronV2TrackID_EtaPT35_002500" \
 		--denominator "EGTrackIDNoMatch_EtaPT35_000000","TkElectronV2TrackIDNoMatch_EtaPT35_000000" \
-		--title ";#eta^{gen};Efficiency" --xmin -3 --xmax 3 --ymin 0.6 --ymax 1.1 --color 1,2 --output $(OutputEOS)/TurnOn_EG_TkE_PT35_NoMatch_Etabinned.png \
+		--title ";#eta^{gen};Efficiency" --xmin -3 --xmax 3 --ymin 0.6 --ymax 1.1 --color 1,2 --output $(OutputEOS)/TurnOn_EG_TkE_PT35_NoMatch_Etabinned_v2.png \
 		--legendx 0.35 --legendy 0.20 \
 		--rebin 10
 
+TurnOn_EG_DYvsEle_PT40_Etabinned: binary/PlotComparison
+	mkdir -p png
+	mkdir -p $(OutputEOS)
+	cp $(IndexPHP) $(OutputEOS)/index.php
+	binary/PlotComparison \
+		--label "SingleEle","DY" \
+		--file $(OutputHists),$(OutputHists2) \
+		--numerator "EGTrackID_EtaPT40_002500","EGTrackID_EtaPT40_002500" \
+		--denominator "EGTrackIDNoMatch_EtaPT40_000000","EGTrackIDNoMatch_EtaPT40_000000" \
+		--title ";#eta^{gen};Efficiency" --xmin -3 --xmax 3 --ymin 0.6 --ymax 1.1 --color 1,2 --output $(OutputEOS)/TurnOn_EG_DYvsEle_PT40_NoMatch_Etabinned.png \
+		--legendx 0.35 --legendy 0.20 \
+		--rebin 10
+
+TurnOn_TkEle_DYvsEle_PT40_Etabinned: binary/PlotComparison
+	mkdir -p png
+	mkdir -p $(OutputEOS)
+	cp $(IndexPHP) $(OutputEOS)/index.php
+	binary/PlotComparison \
+		--label "SingleEle","DY" \
+		--file $(OutputHists),$(OutputHists2) \
+		--numerator "TkElectronV2TrackID_EtaPT40_002500","TkElectronV2TrackID_EtaPT40_002500" \
+		--denominator "TkElectronV2TrackIDNoMatch_EtaPT40_000000","TkElectronV2TrackIDNoMatch_EtaPT40_000000" \
+		--title ";#eta^{gen};Efficiency" --xmin -3 --xmax 3 --ymin 0.6 --ymax 1.1 --color 1,2 --output $(OutputEOS)/TurnOn_TkEle_DYvsEle_PT40_NoMatch_Etabinned.png \
+		--legendx 0.35 --legendy 0.20 \
+		--rebin 10
 
 
 TurnOn_EG_TkE_PT40_Etabinned: binary/PlotComparison
@@ -207,6 +236,73 @@ TurnOn_EG_TkE_PT40_Etabinned: binary/PlotComparison
 		--title ";#eta^{gen};Efficiency" --xmin -3 --xmax 3 --ymin 0.6 --ymax 1.1 --color 1,2 --output $(OutputEOS)/TurnOn_EG_TkE_PT40_NoMatch_Etabinned.png \
 		--legendx 0.35 --legendy 0.20 \
 		--rebin 10
+
+MatchingEff_EG_DYvsEle_PT25: binary/PlotComparison
+	mkdir -p png
+	mkdir -p $(OutputEOS)
+	cp $(IndexPHP) $(OutputEOS)/index.php
+	binary/PlotComparison \
+		--label "SingleEle","DY" \
+		--file $(OutputHists),$(OutputHists2) \
+		--numerator "EGTrackID_PT_002500","EGTrackID_PT_002500" \
+		--denominator "EGTrackIDNoMatch_PT_000000","EGTrackIDNoMatch_PT_000000" \
+		--title ";p^{gen}_{T};Efficiency" --xmin 0 --xmax 100 --color 1,2 --output $(OutputEOS)/MatchingEff_EG_DYvsEle_PT_L1_25.png \
+		--legendx 0.35 --legendy 0.20 \
+		--rebin 10
+
+MatchingEff_TkEle_DYvsEle_PT25: binary/PlotComparison
+	mkdir -p png
+	mkdir -p $(OutputEOS)
+	cp $(IndexPHP) $(OutputEOS)/index.php
+	binary/PlotComparison \
+		--label "SingleEle","DY" \
+		--file $(OutputHists),$(OutputHists2) \
+		--numerator "TkElectronV2TrackID_PT_002500","TkElectronV2TrackID_PT_002500" \
+		--denominator "TkElectronV2TrackIDNoMatch_PT_000000","TkElectronV2TrackIDNoMatch_PT_000000" \
+		--title ";p^{gen}_{T};Efficiency" --xmin 0 --xmax 100 --color 1,2 --output $(OutputEOS)/MatchingEff_TkEle_DYvsEle_PT_L1_25.png \
+		--legendx 0.35 --legendy 0.20 \
+		--rebin 10
+
+
+MatchingEff_EG_DYvsEle_PT: binary/PlotComparison
+	mkdir -p png
+	mkdir -p $(OutputEOS)
+	cp $(IndexPHP) $(OutputEOS)/index.php
+	binary/PlotComparison \
+		--label "SingleEle","DY" \
+		--file $(OutputHists),$(OutputHists2) \
+		--numerator "EGTrackID_PT_000000","EGTrackID_PT_000000" \
+		--denominator "EGTrackIDNoMatch_PT_000000","EGTrackIDNoMatch_PT_000000" \
+		--title ";p^{gen}_{T};Efficiency" --xmin 0 --xmax 100 --color 1,2 --output $(OutputEOS)/MatchingEff_EG_DYvsEle_PT.png \
+		--legendx 0.35 --legendy 0.20 \
+		--rebin 10
+
+MatchingEff_TkEle_DYvsEle_PT: binary/PlotComparison
+	mkdir -p png
+	mkdir -p $(OutputEOS)
+	cp $(IndexPHP) $(OutputEOS)/index.php
+	binary/PlotComparison \
+		--label "SingleEle","DY" \
+		--file $(OutputHists),$(OutputHists2) \
+		--numerator "TkElectronV2TrackID_PT_000000","TkElectronV2TrackID_PT_000000" \
+		--denominator "TkElectronV2TrackIDNoMatch_PT_000000","TkElectronV2TrackIDNoMatch_PT_000000" \
+		--title ";p^{gen}_{T};Efficiency" --xmin 0 --xmax 100 --color 1,2 --output $(OutputEOS)/MatchingEff_TkEle_DYvsEle_PT.png \
+		--legendx 0.35 --legendy 0.20 \
+		--rebin 10
+
+MatchingEff_EG_TkE_PT_barrel: binary/PlotComparison
+	mkdir -p png
+	mkdir -p $(OutputEOS)
+	cp $(IndexPHP) $(OutputEOS)/index.php
+	binary/PlotComparison \
+		--label "EGElectron | 0 <#eta < 1.479","TkElectronV2  | 0 <#eta < 1.479" \
+		--file $(OutputHists),$(OutputHists) \
+		--numerator "EGTrackID_PTEta0to1p479_000000","TkElectronV2TrackID_PTEta0to1p479_000000" \
+		--denominator "EGTrackIDNoMatch_PTEta0to1p479_000000","TkElectronV2TrackIDNoMatch_PTEta0to1p479_000000" \
+		--title ";p^{gen}_{T};Efficiency" --xmin 0 --xmax 50 --output $(OutputEOS)/MatchingEff_EG_TkE_PT_Etabinned.png \
+		--legendx 0.35 --legendy 0.20 \
+		--rebin 10
+
 
 MatchingEff_EG_TkE_PT_Etabinned: binary/PlotComparison
 	mkdir -p png
